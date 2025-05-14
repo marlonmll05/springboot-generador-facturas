@@ -1,0 +1,55 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Compiled files
+/target/
+
+# Maven
+/logs/
+/release/
+/dependency-reduced-pom.xml
+/buildNumber.properties
+/.mvn/timing.properties
+
+# Eclipse
+*.pydevproject
+.project
+.metadata
+.classpath
+.cproject
+.settings/
+bin/
+tmp/
+
+# IntelliJ IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+
+# Test reports
+surefire-reports/
+jacoco.exec
+
+# Others
+*.swp
+*.bak
+*.tmp

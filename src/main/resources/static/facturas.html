@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Facturas</title>
+  <style>
+    :root {
+      --primary: #9b87f5;
+      --primary-dark: #7a68c3;
+      --secondary: #33C3F0;
+      --dark: #1A1F2C;
+      --gray: #8E9196;
+      --light: #f8f9fa;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f9;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: var(--dark);
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .subtitle {
+      color: var(--gray);
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+    }
+    
+    .card-title svg {
+      margin-right: 10px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 5px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--dark);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(155, 135, 245, 0.1);
+    }
+    
+    input[type="date"] {
+      appearance: none;
+    }
+    
+    .button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .button:active {
+      transform: translateY(1px);
+    }
+    
+    .button svg {
+      margin-right: 8px;
+    }
+    
+    .button-secondary {
+      background-color: white;
+      color: var(--dark);
+      border: 1px solid var(--border);
+    }
+    
+    .button-secondary:hover {
+      background-color: var(--light);
+    }
+    
+    .button-small {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    
+    .button-success {
+      background-color: var(--success);
+    }
+    
+    .button-success:hover {
+      background-color: #0da271;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .format-select {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background-color: var(--light);
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(155, 135, 245, 0.05);
+    }
+    
+    .checkbox-cell {
+      width: 40px;
+      text-align: center;
+    }
+    
+    .custom-checkbox {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray);
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: white;
+      color: var(--dark);
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      max-width: 350px;
+    }
+    
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+    
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+    
+    .toast-icon {
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .toast-content {
+      flex-grow: 1;
+    }
+    
+    .toast-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .toast-message {
+      font-size: 13px;
+      color: var(--gray);
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    
+    .fadeOut {
+      animation: fadeOut 0.3s forwards;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .actions-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+      }
+      
+      table {
+        min-width: 800px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Consulta de Facturas</h1>
+      <p class="subtitle">Sistema de búsqueda y descarga de documentos electrónicos</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2 class="card-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Criterios de búsqueda
+      </h2>
+      
+      <form id="facturasForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fechaDesde">Fecha Desde</label>
+            <input type="date" id="fechaDesde" name="fechaDesde">
+          </div>
+          
+          <div class="form-group">
+            <label for="fechaHasta">Fecha Hasta</label>
+            <input type="date" id="fechaHasta" name="fechaHasta">
+          </div>
+          
+          <div class="form-group">
+            <label for="idTercero">Tercero</label>
+            <select id="idTercero" name="idTercero">
+              <option value="">Seleccione un tercero</option>
+            </select>
+          </div>
+          
+          
+          <div class="form-group">
+            <label for="noContrato">Contrato</label>
+            <select id="noContrato" name="noContrato">
+              <option value="">Seleccione un contrato</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="nFact">No. Factura</label>
+            <input type="text" id="nFact" name="nFact" placeholder="Ingrese factura">
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button type="submit" class="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Buscar
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div id="accionesDiv" class="card" style="display:none;">
+      <div class="actions-bar">
+        <div class="format-select">
+          <label for="formatoSelect">Formato de descarga:</label>
+          <select id="formatoSelect" class="select-format">
+            <option value="txt">TXT</option>
+            <option value="json">JSON</option>
+            <option value="ambos">Ambos</option>
+          </select>
+        </div>
+        
+        <div class="button-group">
+          <button onclick="descargarSeleccionados()" class="button button-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Descargar seleccionados
+          </button>
+          
+          <button onclick="seleccionarTodo(true)" class="button button-secondary button-small">Seleccionar todo</button>
+          <button onclick="seleccionarTodo(false)" class="button button-secondary button-small">Deseleccionar todo</button>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table id="resultados">
+          <thead id="tablaHead"></thead>
+          <tbody id="tablaBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fechaDesdeInput = document.getElementById('fechaDesde');
+        const today = new Date().toISOString().split('T')[0];
+        fechaDesdeInput.value = today;
+
+        const fechaHastaInput = document.getElementById('fechaHasta');
+        fechaHastaInput.value = today;
+    });
+
+    function showToast(title, message, type = 'success', duration = 4000) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success'
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>';
+
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+        `;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fadeOut');
+            setTimeout(() => container.removeChild(toast), 300);
+        }, duration);
+    }
+
+    document.getElementById('facturasForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const fechaDesde = document.getElementById('fechaDesde').value;
+        const fechaHasta = document.getElementById('fechaHasta').value;
+
+        // Validar que las fechas no estén vacías
+        if (!fechaDesde) {
+            showToast('Error', 'La Fecha Desde es obligatoria.', 'error');
+            return;
+        }
+        if (!fechaHasta) {
+            showToast('Error', 'La Fecha Hasta es obligatoria.', 'error');
+            return;
+        }
+
+        // Validar que la fecha Desde no sea mayor que la fecha Hasta
+        if (new Date(fechaDesde) > new Date(fechaHasta)) {
+            showToast('Error', 'La Fecha Desde no puede ser mayor que la Fecha Hasta.', 'error');
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (value.trim()) params.append(key, value);
+        }
+
+        try {
+            showToast('Procesando', 'Buscando facturas...', 'success', 2000);
+
+            const response = await fetch(`/api/sql/facturas?${params.toString()}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                showToast('Error', typeof data === 'string' ? data : JSON.stringify(data), 'error');
+                return;
+            }
+
+            const tabla = document.getElementById('resultados');
+            const head = document.getElementById('tablaHead');
+            const body = document.getElementById('tablaBody');
+            const accionesDiv = document.getElementById('accionesDiv');
+
+            accionesDiv.style.display = 'block';
+            head.innerHTML = '';
+            body.innerHTML = '';
+
+            if (data.length === 0) {
+                body.innerHTML = `<tr><td colspan="10" class="empty-state">No se encontraron resultados</td></tr>`;
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            head.innerHTML = '<tr><th class="checkbox-cell"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>' + 
+                              headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            data.forEach(row => {
+                const headersHTML = headers.map(h => `<td>${row[h] ?? ''}</td>`).join('');
+                const idMovDoc = row.idMovDoc || row.IdMovDoc || row.IDMOVDOC || row.ID || '';
+                const filaHTML = `
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="filaCheckbox custom-checkbox" value="${idMovDoc}"></td>
+                        ${headersHTML}
+                    </tr>
+                `;
+                body.innerHTML += filaHTML;
+            });
+
+            showToast('Búsqueda completada', `Se encontraron ${data.length} resultados`, 'success');
+        } catch (err) {
+            showToast('Error', "Error en la solicitud: " + err.message, 'error');
+        }
+    });
+
+    function toggleSelectAll(checkbox) {
+        const checkboxes = document.querySelectorAll('.filaCheckbox');
+        checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    }
+
+    function seleccionarTodo(seleccionar) {
+        const checkboxes = document.querySelectorAll('.filaCheckbox');
+        checkboxes.forEach(cb => cb.checked = seleccionar);
+        const selectAllCheckbox = document.getElementById('selectAll');
+        if (selectAllCheckbox) selectAllCheckbox.checked = seleccionar;
+    }
+
+    async function descargarSeleccionados() {
+        const tipo = document.getElementById('formatoSelect').value;
+        const seleccionados = [...document.querySelectorAll('.filaCheckbox')].filter(cb => cb.checked);
+
+        if (seleccionados.length === 0) {
+            showToast('Atención', "Selecciona al menos un documento.", 'error');
+            return;
+        }
+
+        showToast('Descargando', `Procesando ${seleccionados.length} documento(s)...`, 'success');
+
+        const errores = [];
+
+        for (const cb of seleccionados) {
+            const row = cb.closest('tr');
+            const nfact = row.querySelector('td:nth-child(2)').textContent.trim(); // Segunda celda (después del checkbox)
+            const id = cb.value;
+
+            if (!nfact) {
+                showToast('Error', `No se encontró Nfact para ID ${id}`, 'error');
+                errores.push({ id, tipo, error: 'Nfact no encontrado' });
+                continue;
+            }
+
+            const ripsError = await ejecutarRips(nfact);
+            if (ripsError) {
+                errores.push({ id, tipo, error: ripsError });
+                continue;
+            }
+
+            const downloadError = await descargarZip(id, tipo);
+            if (downloadError) {
+                errores.push({ id, tipo, error: downloadError });
+            }
+        }
+
+        if (errores.length > 0) {
+            console.warn("Errores detectados:", errores);
+            showToast(
+                'Errores en la descarga',
+                `Fallas en ${errores.length} documento(s). Revisa la consola.`,
+                'error'
+            );
+        } else {
+            showToast('Éxito', 'Todos los documentos se descargaron correctamente', 'success');
+        }
+    }
+
+    async function ejecutarRips(nfact) {
+        try {
+            const response = await fetch(`/api/sql/ejecutarRips?Nfact=${encodeURIComponent(nfact)}`);
+            const result = await response.text();
+
+            if (!response.ok) {
+                console.warn(`Error al ejecutar RIPS para ${nfact}: ${result}`);
+                return `Error al ejecutar RIPS: ${result}`;
+            }
+
+            console.log(`RIPS ejecutado para ${nfact}: ${result}`);
+            return null; // sin error
+        } catch (error) {
+            console.error(`Error de red al ejecutar RIPS para ${nfact}:`, error);
+            return `Error de red al ejecutar RIPS: ${error.message}`;
+        }
+    }
+
+    async function descargarZip(id, tipo) {
+        const host = window.location.hostname;
+        const url = `http://${host}:9876/certificados/generarzip/${id}/${tipo}`;
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                const errorBlob = await response.blob();
+                const errorText = await errorBlob.text();
+                if (errorText.toLowerCase().includes("no se pudo obtener el xml")) {
+                    console.warn(`ID ${id}: XML faltante`);
+                    return true;
+                }
+            }
+
+            const blob = await response.blob();
+            let fileName = 'certificado.zip';
+            const contentDisposition = response.headers.get('Content-Disposition');
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+                fileName = contentDisposition.split('filename=')[1].replace(/['"]/g, '').trim();
+            }
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+
+            return false;
+        } catch (error) {
+            console.error(`Error de red para ID ${id}:`, error);
+            return true;
+        }
+    }
+
+    async function cargarTerceros() {
+        try {
+            const response = await fetch('/api/sql/terceros');
+            const data = await response.json();
+            const select = document.getElementById('idTercero');
+
+            data.forEach(tercero => {
+                const option = document.createElement('option');
+                option.value = tercero.idTerceroKey;
+                option.textContent = tercero.nomTercero;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error al cargar terceros:", error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarTerceros);
+
+    document.getElementById('idTercero').addEventListener('change', async function() {
+        const idTerceroKey = this.value;
+        const selectContratos = document.getElementById('noContrato');
+        selectContratos.innerHTML = '<option value="">Seleccione un contrato</option>'; // Limpiar opciones anteriores
+
+        if (idTerceroKey) {
+            try {
+                const response = await fetch(`/api/sql/contratos?idTerceroKey=${idTerceroKey}`);
+                const data = await response.json();
+
+                data.forEach(contrato => {
+                    const option = document.createElement('option');
+                    option.value = contrato.noContrato;
+                    option.textContent = contrato.nomContrato;
+                    selectContratos.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar contratos:", error);
+            }
+        }
+    });
+  </script>
+</body>
+</html>

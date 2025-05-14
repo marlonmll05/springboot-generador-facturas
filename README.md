@@ -8,3 +8,7 @@ Ejemplo:
 
 ## Tiempo de Desarrollo
 Este proyecto me tomó aproximadamente **dos meses** para completarlo. Fue desarrollado como parte de un proyecto en el trabajo. Hasta el momento, esta **aplicación** ha sido implementada en dos centros de salud: la **Clínica Santa Ana** de Baranoa y **Prosalud** en Sabanalarga.
+
+## Vista Previa
+
+![Image](https://github.com/user-attachments/assets/7da2bbf1-cc14-4595-b7e1-2c0b7a717fae)

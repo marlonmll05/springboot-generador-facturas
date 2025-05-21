@@ -50,38 +50,51 @@ public class CertificadoController {
     public ResponseEntity<byte[]> exportDocXml(
             @PathVariable int idMovDoc) {
         Connection conn = null;
-    
+
         try {
-            // Obtener el nombre del servidor desde el registro
-            String servidor = getServerFromRegistry();
-    
-            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoftFinanciero_ST;user=Usuario;password=Contraseña;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
-    
+            String servidor = getServerFromRegistry(); // Asumo que este método existe y funciona
+            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoftFinanciero_ST;user=ConexionApi;password=ApiConexion.77;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
+
             conn = DriverManager.getConnection(connectionUrl);
-    
+
             String query = "SELECT CONVERT(XML, DocXmlEnvelope) AS DocXml FROM MovimientoDocumentos WHERE IdMovDoc = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, idMovDoc);
-    
+
             ResultSet rs = pstmt.executeQuery();
-    
+
             if (rs.next()) {
                 String docXmlContent = rs.getString("DocXml");
-                return ResponseEntity.ok(docXmlContent.getBytes(StandardCharsets.UTF_8));
+                if (docXmlContent != null) {
+                    // Si el contenido XML no es nulo, lo devolvemos con un OK (200)
+                    return ResponseEntity.ok(docXmlContent.getBytes(StandardCharsets.UTF_8));
+                } else {
+                    // Si DocXml es nulo en la base de datos para el ID
+                    System.out.println("El campo DocXmlEnvelope para IdMovDoc " + idMovDoc + " es nulo.");
+                    // Retornamos un 404 NOT_FOUND con un mensaje específico
+                    String errorMessage = "El campo DocXmlEnvelope está vacío para el ID proporcionado.";
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage.getBytes(StandardCharsets.UTF_8));
+                }
             } else {
-                System.out.println("No se encontraron resultados para la consulta.");
-                return ResponseEntity.notFound().build();
+                // Si no se encontraron resultados para el IdMovDoc
+                System.out.println("No se encontraron resultados para el IdMovDoc: " + idMovDoc);
+                // Retornamos un 404 NOT_FOUND con un mensaje específico
+                String errorMessage = "No se encontró ningún documento para el ID proporcionado.";
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage.getBytes(StandardCharsets.UTF_8));
             }
-    
+
         } catch (Exception e) {
             System.err.println("Error obteniendo el DocXml: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(("Error al procesar la solicitud: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
+            // En caso de cualquier otra excepción, devolvemos un 500 INTERNAL_SERVER_ERROR
+            String errorMessage = "Error obteniendo el DocXml: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage.getBytes(StandardCharsets.UTF_8));
         } finally {
             if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
                     System.err.println("Error cerrando la conexión: " + e.getMessage());
+                    // No se puede retornar aquí, solo loguear el error
                 }
             }
         }
@@ -96,7 +109,7 @@ public class CertificadoController {
              // Obtener el nombre del servidor desde el registro
             String servidor = getServerFromRegistry();
 
-            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoft100_ST;user=Usuario;password=Contraseña;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
+            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoft100_ST;user=ConexionApi;password=ApiConexion.77;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
             
             conn = DriverManager.getConnection(connectionUrl);
     
@@ -562,7 +575,7 @@ public class CertificadoController {
         try {
             // Obtener el nombre del servidor desde el registro
             String servidor = getServerFromRegistry();
-            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoft100_ST;user=Usuario;password=Contraseña;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
+            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoft100_ST;user=ConexionApi;password=ApiConexion.77;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
             conn = DriverManager.getConnection(connectionUrl);
     
             // 1. Consulta de Facturas
@@ -931,7 +944,7 @@ public class CertificadoController {
             // Obtener el nombre del servidor desde el registro
             String servidor = getServerFromRegistry();
     
-            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoftFinanciero_ST;user=Usuario;password=Contraseña;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
+            String connectionUrl = String.format("jdbc:sqlserver://%s;databaseName=IPSoftFinanciero_ST;user=ConexionApi;password=ApiConexion.77;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1;", servidor);
             conn = DriverManager.getConnection(connectionUrl);
     
             // Obtener Prefijo y Numdoc
@@ -973,9 +986,14 @@ public class CertificadoController {
                     zos.write(xmlResponse.getBody());
                     zos.closeEntry();
                 } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body(new ByteArrayResource("No se pudo obtener el XML o está vacío".getBytes()));
-                }
+                    String errorMessage = "No se pudo obtener el XML."; // Mensaje por defecto
+                    if (xmlResponse.getBody() != null && xmlResponse.getBody().length > 0) {
+                        errorMessage = new String(xmlResponse.getBody(), StandardCharsets.UTF_8);
+                    }
+                    // Devolvemos el mismo estado HTTP que exportDocXml para que el frontend lo interprete
+                    return ResponseEntity.status(xmlResponse.getStatusCode())
+                                .body(new ByteArrayResource(errorMessage.getBytes()));
+                    }
     
                 // 2. Obtener y agregar JSON (si se solicitó)
                 boolean jsonRequired = "json".equals(tipoArchivo) || "ambos".equals(tipoArchivo);

@@ -38,7 +38,38 @@
       margin: 0 auto;
       padding: 20px;
     }
-    
+
+   .back-link {
+      display: inline-flex;
+      align-items: center;
+      color: #9b87f5;
+      text-decoration: none;
+      transition: color 0.2s, background-color 0.2s;
+      background-color: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      background-color: #9b87f5;
+      color: white;
+    }
+
+
+    .back-link svg {
+      margin-right: 6px;
+    }
+
+
+    .back-link::before {
+      content: "←";
+      margin-right: 0.5rem;
+      color:#9b87f5;
+    }
+    .back-link:hover:before {
+      color:#ffffff;
+    }
     header {
       background-color: white;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -227,22 +258,29 @@
       padding: 40px 20px;
       color: var(--gray);
     }
+
+    #toastContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column; /* Cambiado para apilar verticalmente */
+    gap: 10px; /* Espacio entre las notificaciones */
+    z-index: 1000;
+    }
     
     .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: white;
-      color: var(--dark);
-      padding: 12px 20px;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      display: flex;
-      align-items: center;
-      z-index: 1000;
-      animation: slideIn 0.3s ease-out;
-      max-width: 350px;
+    background-color: white;
+    color: var(--dark);
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+    max-width: 350px;
     }
+
     
     .toast.success {
       border-left: 4px solid var(--success);
@@ -318,6 +356,7 @@
 <body>
   <header>
     <div class="container">
+      <a href="inicio.html" class="back-link">Volver</a>
       <h1>Consulta de Facturas</h1>
       <p class="subtitle">Sistema de búsqueda y descarga de documentos electrónicos</p>
     </div>
@@ -416,270 +455,258 @@
   <div id="toastContainer"></div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const fechaDesdeInput = document.getElementById('fechaDesde');
-        const today = new Date().toISOString().split('T')[0];
-        fechaDesdeInput.value = today;
+      document.addEventListener('DOMContentLoaded', () => {
+          const fechaDesdeInput = document.getElementById('fechaDesde');
+          const today = new Date().toISOString().split('T')[0];
+          fechaDesdeInput.value = today;
 
-        const fechaHastaInput = document.getElementById('fechaHasta');
-        fechaHastaInput.value = today;
-    });
+          const fechaHastaInput = document.getElementById('fechaHasta');
+          fechaHastaInput.value = today;
+      });
 
-    function showToast(title, message, type = 'success', duration = 4000) {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const icon = type === 'success'
-            ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>'
-            : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>';
+      function showToast(title, message, type = 'success', duration = 8000) { 
+          const container = document.getElementById('toastContainer');
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          const icon = type === 'success'
+              ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>'
+              : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ...></svg>';
 
-        toast.innerHTML = `
-            <div class="toast-icon">${icon}</div>
-            <div class="toast-content">
-                <div class="toast-title">${title}</div>
-                <div class="toast-message">${message}</div>
-            </div>
-        `;
+          toast.innerHTML = `
+              <div class="toast-icon">${icon}</div>
+              <div class="toast-content">
+                  <div class="toast-title">${title}</div>
+                  <div class="toast-message">${message}</div>
+              </div>
+          `;
 
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.classList.add('fadeOut');
-            setTimeout(() => container.removeChild(toast), 300);
-        }, duration);
-    }
+          container.appendChild(toast);
+          setTimeout(() => {
+              toast.classList.add('fadeOut');
+              setTimeout(() => container.removeChild(toast), 300);
+          }, duration);
+      }
 
-    document.getElementById('facturasForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+      document.getElementById('facturasForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
 
-        const fechaDesde = document.getElementById('fechaDesde').value;
-        const fechaHasta = document.getElementById('fechaHasta').value;
+          const fechaDesde = document.getElementById('fechaDesde').value;
+          const fechaHasta = document.getElementById('fechaHasta').value;
 
-        // Validar que las fechas no estén vacías
-        if (!fechaDesde) {
-            showToast('Error', 'La Fecha Desde es obligatoria.', 'error');
-            return;
-        }
-        if (!fechaHasta) {
-            showToast('Error', 'La Fecha Hasta es obligatoria.', 'error');
-            return;
-        }
+          // Validar que las fechas no estén vacías
+          if (!fechaDesde) {
+              showToast('Error', 'La Fecha Desde es obligatoria.', 'error');
+              return;
+          }
+          if (!fechaHasta) {
+              showToast('Error', 'La Fecha Hasta es obligatoria.', 'error');
+              return;
+          }
 
-        // Validar que la fecha Desde no sea mayor que la fecha Hasta
-        if (new Date(fechaDesde) > new Date(fechaHasta)) {
-            showToast('Error', 'La Fecha Desde no puede ser mayor que la Fecha Hasta.', 'error');
-            return;
-        }
+          // Validar que la fecha Desde no sea mayor que la fecha Hasta
+          if (new Date(fechaDesde) > new Date(fechaHasta)) {
+              showToast('Error', 'La Fecha Desde no puede ser mayor que la Fecha Hasta.', 'error');
+              return;
+          }
 
-        const formData = new FormData(e.target);
-        const params = new URLSearchParams();
-        for (const [key, value] of formData.entries()) {
-            if (value.trim()) params.append(key, value);
-        }
+          const formData = new FormData(e.target);
+          const params = new URLSearchParams();
+          for (const [key, value] of formData.entries()) {
+              if (value.trim()) params.append(key, value);
+          }
 
-        try {
-            showToast('Procesando', 'Buscando facturas...', 'success', 2000);
+          try {
+              showToast('Procesando', 'Buscando facturas...', 'success', 2000);
 
-            const response = await fetch(`/api/sql/facturas?${params.toString()}`);
-            const data = await response.json();
+              const response = await fetch(`/api/sql/facturas?${params.toString()}`);
+              const data = await response.json();
 
-            if (!response.ok) {
-                showToast('Error', typeof data === 'string' ? data : JSON.stringify(data), 'error');
-                return;
-            }
+              if (!response.ok) {
+                  showToast('Error', typeof data === 'string' ? data : JSON.stringify(data), 'error');
+                  return;
+              }
 
-            const tabla = document.getElementById('resultados');
-            const head = document.getElementById('tablaHead');
-            const body = document.getElementById('tablaBody');
-            const accionesDiv = document.getElementById('accionesDiv');
+              const tabla = document.getElementById('resultados');
+              const head = document.getElementById('tablaHead');
+              const body = document.getElementById('tablaBody');
+              const accionesDiv = document.getElementById('accionesDiv');
 
-            accionesDiv.style.display = 'block';
-            head.innerHTML = '';
-            body.innerHTML = '';
+              accionesDiv.style.display = 'block';
+              head.innerHTML = '';
+              body.innerHTML = '';
 
-            if (data.length === 0) {
-                body.innerHTML = `<tr><td colspan="10" class="empty-state">No se encontraron resultados</td></tr>`;
-                return;
-            }
+              if (data.length === 0) {
+                  body.innerHTML = `<tr><td colspan="10" class="empty-state">No se encontraron resultados</td></tr>`;
+                  return;
+              }
 
-            const headers = Object.keys(data[0]);
-            head.innerHTML = '<tr><th class="checkbox-cell"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>' + 
-                              headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+              const headers = Object.keys(data[0]);
+              head.innerHTML = '<tr><th class="checkbox-cell"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>' + 
+                                headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
 
-            data.forEach(row => {
-                const headersHTML = headers.map(h => `<td>${row[h] ?? ''}</td>`).join('');
-                const idMovDoc = row.idMovDoc || row.IdMovDoc || row.IDMOVDOC || row.ID || '';
-                const filaHTML = `
-                    <tr>
-                        <td class="checkbox-cell"><input type="checkbox" class="filaCheckbox custom-checkbox" value="${idMovDoc}"></td>
-                        ${headersHTML}
-                    </tr>
-                `;
-                body.innerHTML += filaHTML;
-            });
+              data.forEach(row => {
+                  const headersHTML = headers.map(h => `<td>${row[h] ?? ''}</td>`).join('');
+                  const idMovDoc = row.idMovDoc || row.IdMovDoc || row.IDMOVDOC || row.ID || '';
+                  const filaHTML = `
+                      <tr>
+                          <td class="checkbox-cell"><input type="checkbox" class="filaCheckbox custom-checkbox" value="${idMovDoc}"></td>
+                          ${headersHTML}
+                      </tr>
+                  `;
+                  body.innerHTML += filaHTML;
+              });
 
-            showToast('Búsqueda completada', `Se encontraron ${data.length} resultados`, 'success');
-        } catch (err) {
-            showToast('Error', "Error en la solicitud: " + err.message, 'error');
-        }
-    });
+              showToast('Búsqueda completada', `Se encontraron ${data.length} resultados`, 'success');
+          } catch (err) {
+              showToast('Error', "Error en la solicitud: " + err.message, 'error');
+          }
+      });
 
-    function toggleSelectAll(checkbox) {
-        const checkboxes = document.querySelectorAll('.filaCheckbox');
-        checkboxes.forEach(cb => cb.checked = checkbox.checked);
-    }
+      function toggleSelectAll(checkbox) {
+          const checkboxes = document.querySelectorAll('.filaCheckbox');
+          checkboxes.forEach(cb => cb.checked = checkbox.checked);
+      }
 
-    function seleccionarTodo(seleccionar) {
-        const checkboxes = document.querySelectorAll('.filaCheckbox');
-        checkboxes.forEach(cb => cb.checked = seleccionar);
-        const selectAllCheckbox = document.getElementById('selectAll');
-        if (selectAllCheckbox) selectAllCheckbox.checked = seleccionar;
-    }
+      function seleccionarTodo(seleccionar) {
+          const checkboxes = document.querySelectorAll('.filaCheckbox');
+          checkboxes.forEach(cb => cb.checked = seleccionar);
+          const selectAllCheckbox = document.getElementById('selectAll');
+          if (selectAllCheckbox) selectAllCheckbox.checked = seleccionar;
+      }
 
-    async function descargarSeleccionados() {
-        const tipo = document.getElementById('formatoSelect').value;
-        const seleccionados = [...document.querySelectorAll('.filaCheckbox')].filter(cb => cb.checked);
+      async function descargarSeleccionados() {
+          const tipo = document.getElementById('formatoSelect').value;
+          const seleccionados = [...document.querySelectorAll('.filaCheckbox')].filter(cb => cb.checked);
 
-        if (seleccionados.length === 0) {
-            showToast('Atención', "Selecciona al menos un documento.", 'error');
-            return;
-        }
+          if (seleccionados.length === 0) {
+              showToast('Atención', "Selecciona al menos un documento.", 'error');
+              return;
+          }
 
-        showToast('Descargando', `Procesando ${seleccionados.length} documento(s)...`, 'success');
+          showToast('Descargando', `Procesando ${seleccionados.length} documento(s)...`, 'success');
 
-        const errores = [];
+          const errores = [];
 
-        for (const cb of seleccionados) {
-            const row = cb.closest('tr');
-            const nfact = row.querySelector('td:nth-child(2)').textContent.trim(); // Segunda celda (después del checkbox)
-            const id = cb.value;
+          for (const cb of seleccionados) {
+              const row = cb.closest('tr');
+              const nfact = row.querySelector('td:nth-child(2)').textContent.trim(); // Segunda celda (después del checkbox)
+              const id = cb.value;
 
-            if (!nfact) {
-                showToast('Error', `No se encontró Nfact para ID ${id}`, 'error');
-                errores.push({ id, tipo, error: 'Nfact no encontrado' });
-                continue;
-            }
+              if (!nfact) {
+                  showToast('Error', `No se encontró Nfact para ID ${id}`, 'error');
+                  errores.push({ id, tipo, error: 'Nfact no encontrado' });
+                  continue;
+              }
 
-            const ripsError = await ejecutarRips(nfact);
-            if (ripsError) {
-                errores.push({ id, tipo, error: ripsError });
-                continue;
-            }
+              const ripsError = await ejecutarRips(nfact);
+              if (ripsError) {
+                  showToast('Error', ripsError, 'error'); // Mostrar error en notificación
+                  errores.push({ id, tipo, error: ripsError });
+                  continue;
+              }
 
-            const downloadError = await descargarZip(id, tipo);
-            if (downloadError) {
-                errores.push({ id, tipo, error: downloadError });
-            }
-        }
+              const downloadError = await descargarZip(id, tipo);
+              if (downloadError) {
+                  showToast('Error', downloadError, 'error'); // Mostrar error en notificación
+                  errores.push({ id, tipo, error: downloadError });
+              }
+          }
 
-        if (errores.length > 0) {
-            console.warn("Errores detectados:", errores);
-            showToast(
-                'Errores en la descarga',
-                `Fallas en ${errores.length} documento(s). Revisa la consola.`,
-                'error'
-            );
-        } else {
-            showToast('Éxito', 'Todos los documentos se descargaron correctamente', 'success');
-        }
-    }
+      }
 
-    async function ejecutarRips(nfact) {
-        try {
-            const response = await fetch(`/api/sql/ejecutarRips?Nfact=${encodeURIComponent(nfact)}`);
-            const result = await response.text();
+      async function ejecutarRips(nfact) {
+          try {
+              const response = await fetch(`/api/sql/ejecutarRips?Nfact=${encodeURIComponent(nfact)}`);
+              const result = await response.text();
 
-            if (!response.ok) {
-                console.warn(`Error al ejecutar RIPS para ${nfact}: ${result}`);
-                return `Error al ejecutar RIPS: ${result}`;
-            }
+              if (!response.ok) {
+                  return `Error al ejecutar RIPS para ${nfact}: ${result}`;
+              }
 
-            console.log(`RIPS ejecutado para ${nfact}: ${result}`);
-            return null; // sin error
-        } catch (error) {
-            console.error(`Error de red al ejecutar RIPS para ${nfact}:`, error);
-            return `Error de red al ejecutar RIPS: ${error.message}`;
-        }
-    }
+              return null; // sin error
+          } catch (error) {
+              return `Error de red al ejecutar RIPS para ${nfact}: ${error.message}`;
+          }
+      }
 
-    async function descargarZip(id, tipo) {
-        const host = window.location.hostname;
-        const url = `http://${host}:9876/certificados/generarzip/${id}/${tipo}`;
+      async function descargarZip(id, tipo) {
+          const host = window.location.hostname;
+          const url = `http://${host}:9876/certificados/generarzip/${id}/${tipo}`;
 
-        try {
-            const response = await fetch(url);
+          try {
+              const response = await fetch(url);
 
-            if (!response.ok) {
-                const errorBlob = await response.blob();
-                const errorText = await errorBlob.text();
-                if (errorText.toLowerCase().includes("no se pudo obtener el xml")) {
-                    console.warn(`ID ${id}: XML faltante`);
-                    return true;
-                }
-            }
+              if (!response.ok) {
+                  const errorText = await response.text(); // Solo si es error, leer como texto
+                  return `Error al descargar ZIP para ID ${id}: ${errorText}`;
+              }
 
-            const blob = await response.blob();
-            let fileName = 'certificado.zip';
-            const contentDisposition = response.headers.get('Content-Disposition');
-            if (contentDisposition && contentDisposition.includes('filename=')) {
-                fileName = contentDisposition.split('filename=')[1].replace(/['"]/g, '').trim();
-            }
+              const blob = await response.blob(); 
 
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(downloadUrl);
+              let fileName = 'certificado.zip';
+              const contentDisposition = response.headers.get('Content-Disposition');
+              if (contentDisposition && contentDisposition.includes('filename=')) {
+                  fileName = contentDisposition.split('filename=')[1].replace(/['"]/g, '').trim();
+              }
 
-            return false;
-        } catch (error) {
-            console.error(`Error de red para ID ${id}:`, error);
-            return true;
-        }
-    }
+              const downloadUrl = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = downloadUrl;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(downloadUrl);
 
-    async function cargarTerceros() {
-        try {
-            const response = await fetch('/api/sql/terceros');
-            const data = await response.json();
-            const select = document.getElementById('idTercero');
+              return false; // Sin error
+          } catch (error) {
+              return `Error de red para ID ${id}: ${error.message}`;
+          }
+      }
 
-            data.forEach(tercero => {
-                const option = document.createElement('option');
-                option.value = tercero.idTerceroKey;
-                option.textContent = tercero.nomTercero;
-                select.appendChild(option);
-            });
-        } catch (error) {
-            console.error("Error al cargar terceros:", error);
-        }
-    }
 
-    document.addEventListener('DOMContentLoaded', cargarTerceros);
 
-    document.getElementById('idTercero').addEventListener('change', async function() {
-        const idTerceroKey = this.value;
-        const selectContratos = document.getElementById('noContrato');
-        selectContratos.innerHTML = '<option value="">Seleccione un contrato</option>'; // Limpiar opciones anteriores
+      async function cargarTerceros() {
+          try {
+              const response = await fetch('/api/sql/terceros');
+              const data = await response.json();
+              const select = document.getElementById('idTercero');
 
-        if (idTerceroKey) {
-            try {
-                const response = await fetch(`/api/sql/contratos?idTerceroKey=${idTerceroKey}`);
-                const data = await response.json();
+              data.forEach(tercero => {
+                  const option = document.createElement('option');
+                  option.value = tercero.idTerceroKey;
+                  option.textContent = tercero.nomTercero;
+                  select.appendChild(option);
+              });
+          } catch (error) {
+              showToast("Error", "Error al cargar terceros: " + error.message, 'error'); // Mostrar error en notificación
+          }
+      }
 
-                data.forEach(contrato => {
-                    const option = document.createElement('option');
-                    option.value = contrato.noContrato;
-                    option.textContent = contrato.nomContrato;
-                    selectContratos.appendChild(option);
-                });
-            } catch (error) {
-                console.error("Error al cargar contratos:", error);
-            }
-        }
-    });
+      document.addEventListener('DOMContentLoaded', cargarTerceros);
+
+      document.getElementById('idTercero').addEventListener('change', async function() {
+          const idTerceroKey = this.value;
+          const selectContratos = document.getElementById('noContrato');
+          selectContratos.innerHTML = '<option value="">Seleccione un contrato</option>'; // Limpiar opciones anteriores
+
+          if (idTerceroKey) {
+              try {
+                  const response = await fetch(`/api/sql/contratos?idTerceroKey=${idTerceroKey}`);
+                  const data = await response.json();
+
+                  data.forEach(contrato => {
+                      const option = document.createElement('option');
+                      option.value = contrato.noContrato;
+                      option.textContent = contrato.nomContrato;
+                      selectContratos.appendChild(option);
+                  });
+              } catch (error) {
+                  showToast("Error", "Error al cargar contratos: " + error.message, 'error'); // Mostrar error en notificación
+              }
+          }
+      });
   </script>
+
 </body>
 </html>

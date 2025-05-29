@@ -574,7 +574,7 @@
           if (selectAllCheckbox) selectAllCheckbox.checked = seleccionar;
       }
 
-      async function descargarSeleccionados() {
+            async function descargarSeleccionados() {
           const tipo = document.getElementById('formatoSelect').value;
           const seleccionados = [...document.querySelectorAll('.filaCheckbox')].filter(cb => cb.checked);
 
@@ -600,17 +600,22 @@
 
               const ripsError = await ejecutarRips(nfact);
               if (ripsError) {
-                  showToast('Error', ripsError, 'error'); // Mostrar error en notificación
+                  showToast('Error', ripsError, 'error'); 
                   errores.push({ id, tipo, error: ripsError });
                   continue;
               }
 
               const downloadError = await descargarZip(id, tipo);
               if (downloadError) {
-                  showToast('Error', downloadError, 'error'); // Mostrar error en notificación
+                  showToast('Error', downloadError, 'error'); 
                   errores.push({ id, tipo, error: downloadError });
               }
           }
+          document.querySelectorAll('.filaCheckbox').forEach(cb => cb.checked = false);
+
+
+          const selectAllCheckbox = document.getElementById('selectAll');
+          if (selectAllCheckbox) selectAllCheckbox.checked = false;
 
       }
 
